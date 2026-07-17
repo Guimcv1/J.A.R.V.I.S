@@ -1,0 +1,316 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Jarvis.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="660"
+        x:Class="Jarvis.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="JARVIS - AI Core"
+        Background="#08090D"
+        FontFamily="Inter, Arial, sans-serif"
+        Foreground="#C5C6C7"
+        Width="1000" Height="660">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="52, *">
+
+        <!-- ═══════════════════════════════════════════════════════
+             TOP NAV BAR
+        ═══════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0"
+                Background="#0D0F17"
+                BorderBrush="#1A2033"
+                BorderThickness="0,0,0,1"
+                Padding="24,0">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+
+                <!-- Brand -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <TextBlock Text="JARVIS"
+                               FontSize="18" FontWeight="Bold"
+                               Foreground="#66FCF1"
+                               LetterSpacing="4"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="AI CORE v0.1"
+                               FontSize="10" Foreground="#2D5A6B"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Tab Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                            HorizontalAlignment="Center" VerticalAlignment="Stretch">
+
+                    <Button Command="{Binding SelectCoreTabCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="20,0"
+                            VerticalContentAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="CORE"
+                                       FontSize="12" FontWeight="SemiBold" LetterSpacing="2"
+                                       Foreground="#66FCF1"/>
+                            <Border Height="2" CornerRadius="1" Margin="0,2,0,0"
+                                    Background="#66FCF1"
+                                    IsVisible="{Binding IsMainTabVisible}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding SelectTerminalTabCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="20,0"
+                            VerticalContentAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="TERMINAL"
+                                       FontSize="12" FontWeight="SemiBold" LetterSpacing="2"
+                                       Foreground="#66FCF1"/>
+                            <Border Height="2" CornerRadius="1" Margin="0,2,0,0"
+                                    Background="#66FCF1"
+                                    IsVisible="{Binding IsTerminalTabVisible}"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                <!-- Status pill -->
+                <Border Grid.Column="2" Background="#131926"
+                        CornerRadius="12" Padding="12,4" VerticalAlignment="Center"
+                        BorderBrush="#1A2033" BorderThickness="1">
+                    <TextBlock Text="{Binding CoreStatus}"
+                               FontSize="11" FontWeight="SemiBold"
+                               Foreground="#45A29E" LetterSpacing="2"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 1: CORE VIEW
+        ═══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Background="#08090D"
+              IsVisible="{Binding IsMainTabVisible}">
+
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="0">
+
+                <!-- Animated JARVIS Circle -->
+                <!-- The Panel is 300x300; scaling is applied to its center -->
+                <Panel Width="300" Height="300"
+                       HorizontalAlignment="Center"
+                       RenderTransformOrigin="0.5, 0.5">
+                    <Panel.RenderTransform>
+                        <ScaleTransform ScaleX="{Binding CircleScale}"
+                                        ScaleY="{Binding CircleScale}"/>
+                    </Panel.RenderTransform>
+
+                    <!-- Outer glow ring (opacity-driven by animation) -->
+                    <Ellipse Width="300" Height="300"
+                             Opacity="{Binding GlowOpacity}">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#5500E5FF" Offset="0.0"/>
+                                <GradientStop Color="#2200B5DD" Offset="0.55"/>
+                                <GradientStop Color="#0000E5FF" Offset="1.0"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#00E5FF" BlurRadius="48" OffsetX="0" OffsetY="0"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <!-- Middle ring (subtle secondary glow) -->
+                    <Ellipse Width="230" Height="230"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Opacity="0.6">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#220066AA" Offset="0.0"/>
+                                <GradientStop Color="#00001133" Offset="1.0"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+
+                    <!-- Dark core -->
+                    <Ellipse Width="190" Height="190"
+                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#08090D" Offset="0.0"/>
+                                <GradientStop Color="#0E1520" Offset="1.0"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+
+                    <!-- Cyan border ring -->
+                    <Ellipse Width="200" Height="200"
+                             Stroke="#00E5FF" StrokeThickness="2"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Fill="Transparent">
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#00E5FF" BlurRadius="12" OffsetX="0" OffsetY="0"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <!-- Inner accent ring -->
+                    <Ellipse Width="160" Height="160"
+                             Stroke="#1A6B8A" StrokeThickness="1"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Fill="Transparent" Opacity="0.7"/>
+
+                    <!-- Center dot -->
+                    <Ellipse Width="16" Height="16"
+                             Fill="#00E5FF"
+                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#00E5FF" BlurRadius="18" OffsetX="0" OffsetY="0"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                </Panel>
+
+                <!-- Status Label -->
+                <TextBlock Text="{Binding CoreStatus}"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="#45A29E" LetterSpacing="4"
+                           HorizontalAlignment="Center"
+                           Margin="0,28,0,0"/>
+
+                <!-- Voice Loop Toggle Button -->
+                <Button Command="{Binding ToggleVoiceLoopCommand}"
+                        HorizontalAlignment="Center"
+                        Margin="0,24,0,0"
+                        Padding="32,14"
+                        CornerRadius="8"
+                        Background="#131926"
+                        BorderBrush="#00E5FF"
+                        BorderThickness="1">
+                    <Button.Effect>
+                        <DropShadowEffect Color="#00E5FF" BlurRadius="12" OffsetX="0" OffsetY="0"/>
+                    </Button.Effect>
+                    <TextBlock Text="{Binding VoiceButtonLabel}"
+                               FontSize="12" FontWeight="SemiBold"
+                               Foreground="#00E5FF" LetterSpacing="2"/>
+                </Button>
+
+                <!-- Quick text input on Core tab -->
+                <Grid ColumnDefinitions="*, Auto" Margin="0,24,0,0" Width="420">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding UserInput}"
+                             PlaceholderText="Quick text input..."
+                             Background="#0D0F17"
+                             Foreground="#C5C6C7"
+                             CaretBrush="#66FCF1"
+                             SelectionBrush="#3345A29E"
+                             BorderBrush="#1A2033"
+                             BorderThickness="1"
+                             CornerRadius="6"
+                             Padding="14,11"
+                             FontSize="13">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Return" Command="{Binding SendMessageCommand}"/>
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                    <Button Grid.Column="1"
+                            Command="{Binding SendMessageCommand}"
+                            Content="SEND"
+                            Background="#45A29E" Foreground="#08090D"
+                            FontWeight="Bold" FontSize="12"
+                            Margin="8,0,0,0" Padding="18,11"
+                            CornerRadius="6"/>
+                </Grid>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════
+             TAB 2: TERMINAL VIEW
+        ═══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" RowDefinitions="*, 180"
+              Background="#08090D"
+              IsVisible="{Binding IsTerminalTabVisible}">
+
+            <!-- Conversation Log -->
+            <ScrollViewer Grid.Row="0" Margin="32,24,32,12">
+                <ItemsControl ItemsSource="{Binding ConversationLog}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#0F1420"
+                                    CornerRadius="6"
+                                    Padding="18,13"
+                                    Margin="0,0,0,8"
+                                    BorderBrush="#1A2033"
+                                    BorderThickness="1">
+                                <SelectableTextBlock Text="{Binding}"
+                                           TextWrapping="Wrap"
+                                           FontSize="14"
+                                           Foreground="#D4D6D8"
+                                           LineHeight="22"
+                                           SelectionBrush="#4045A29E"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Bottom: System Log + Input -->
+            <Border Grid.Row="1"
+                    Background="#0D0F17"
+                    BorderBrush="#1A2033"
+                    BorderThickness="0,1,0,0"
+                    Padding="32,16">
+                <Grid RowDefinitions="Auto, *">
+
+                    <!-- Text Input Row -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto"
+                          Margin="0,0,0,12">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding UserInput}"
+                                 PlaceholderText="Enter command or query..."
+                                 Background="#08090D"
+                                 Foreground="#C5C6C7"
+                                 CaretBrush="#66FCF1"
+                                 SelectionBrush="#3345A29E"
+                                 BorderBrush="#2C4A6B"
+                                 BorderThickness="1"
+                                 CornerRadius="5"
+                                 Padding="14,11"
+                                 FontSize="14">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Return" Command="{Binding SendMessageCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <Button Grid.Column="1"
+                                Command="{Binding SendMessageCommand}"
+                                Content="SEND"
+                                Background="#45A29E" Foreground="#08090D"
+                                FontWeight="Bold" FontSize="13"
+                                Margin="10,0,0,0" Padding="22,11"
+                                CornerRadius="5"/>
+                    </Grid>
+
+                    <!-- System Log Stream (selectable) -->
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding SystemLog}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <SelectableTextBlock Text="{Binding}"
+                                               FontSize="11"
+                                               Foreground="#2E8B8B"
+                                               FontFamily="Consolas, Courier New, Monospace"
+                                               SelectionBrush="#4045A29E"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                </Grid>
+            </Border>
+        </Grid>
+
+    </Grid>
+</Window>

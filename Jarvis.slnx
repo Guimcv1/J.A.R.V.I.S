@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Jarvis.Core/Jarvis.Core.csproj" />
+  <Project Path="Jarvis.Agent/Jarvis.Agent.csproj" />
+  <Project Path="Jarvis.Tools/Jarvis.Tools.csproj" />
+  <Project Path="Jarvis.Console/Jarvis.Console.csproj" />
+  <Project Path="Jarvis.Infrastructure/Jarvis.Infrastructure.csproj" />
+  <Project Path="Jarvis.UI/Jarvis.UI.csproj" />
+</Solution>
