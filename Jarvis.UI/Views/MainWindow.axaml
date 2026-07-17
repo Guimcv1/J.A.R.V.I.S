@@ -77,14 +77,30 @@
 
                 </StackPanel>
 
-                <!-- Status pill -->
-                <Border Grid.Column="2" Background="#131926"
-                        CornerRadius="12" Padding="12,4" VerticalAlignment="Center"
-                        BorderBrush="#1A2033" BorderThickness="1">
-                    <TextBlock Text="{Binding CoreStatus}"
-                               FontSize="11" FontWeight="SemiBold"
-                               Foreground="#45A29E" LetterSpacing="2"/>
-                </Border>
+                <!-- Right Status & Language -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!-- Language Toggle -->
+                    <Button Command="{Binding ToggleLanguageCommand}"
+                            Background="#131926"
+                            BorderBrush="#1A2033"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,4"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding LanguageLabel}"
+                                   FontSize="11" FontWeight="Bold"
+                                   Foreground="#C5C6C7" LetterSpacing="1"/>
+                    </Button>
+                    
+                    <!-- Status pill -->
+                    <Border Background="#131926"
+                            CornerRadius="12" Padding="12,4" VerticalAlignment="Center"
+                            BorderBrush="#1A2033" BorderThickness="1">
+                        <TextBlock Text="{Binding CoreStatus}"
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#45A29E" LetterSpacing="2"/>
+                    </Border>
+                </StackPanel>
             </Grid>
         </Border>
 

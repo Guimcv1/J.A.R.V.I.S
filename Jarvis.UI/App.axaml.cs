@@ -27,6 +27,15 @@ public partial class App : Application
             {
                 DataContext = new MainWindowViewModel(llmService, speechService, ttsService),
             };
+
+            desktop.Exit += async (sender, e) =>
+            {
+                // Libera o modelo do Ollama da VRAM quando o app fechar
+                await llmService.UnloadModelAsync();
+                
+                // Interrompe qualquer áudio ou processo do Piper que tenha ficado aberto
+                ttsService.Stop();
+            };
         }
 
         base.OnFrameworkInitializationCompleted();

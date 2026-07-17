@@ -41,11 +41,11 @@ public sealed class PiperTtsService : IAudioOutputService
     // ── Configuração resolvida no construtor ─────────────────────────────────
 
     private readonly string _piperExecutable;
-    private readonly string _modelPath;
+    private string _modelPath;
     private readonly string _audioPlayer;
     private readonly string _audioPlayerArgsFormat; // {0} = path do WAV
     private readonly string _tempWavPath;
-    private readonly bool _isAvailable;
+    private bool _isAvailable;
 
     // ── Estado de execução ───────────────────────────────────────────────────
 
@@ -76,11 +76,21 @@ public sealed class PiperTtsService : IAudioOutputService
     ///     • en_GB-northern_english_male-medium.onnx  (sotaque norte-inglês)
     ///     • en_US-ryan-high.onnx                     (masculino americano, alta qualidade)
     /// </param>
-    public PiperTtsService(string? piperDirectory = null, string modelFileName = "en_GB-alan-medium.onnx")
+    public PiperTtsService(string? piperDirectory = null, string modelFileName = "pt_BR-faber-medium.onnx")
     {
         bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         piperDirectory ??= Path.Combine(AppContext.BaseDirectory, "piper");
+
+        // Se não encontrou no diretório atual (ex: rodando Jarvis.UI no modo de dev), tenta buscar no Jarvis.Console
+        if (!Directory.Exists(piperDirectory))
+        {
+            var devConsolePiperDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Jarvis.Console", "bin", "Debug", "net10.0", "piper"));
+            if (Directory.Exists(devConsolePiperDir))
+            {
+                piperDirectory = devConsolePiperDir;
+            }
+        }
 
         _piperExecutable = Path.Combine(piperDirectory, isWindows ? "piper.exe" : "piper");
         _modelPath       = Path.Combine(piperDirectory, "models", modelFileName);
@@ -121,6 +131,26 @@ public sealed class PiperTtsService : IAudioOutputService
                 $"  Modelo esperado  : {_modelPath}\n" +
                 "  Execute scripts/setup-piper.sh para instalar automaticamente.");
             Console.ResetColor();
+        }
+    }
+
+    /// <summary>
+    /// Troca dinamicamente o modelo de voz do Piper TTS.
+    /// </summary>
+    public void SetLanguage(string modelFileName)
+    {
+        var dir = Path.GetDirectoryName(_modelPath);
+        if (dir != null)
+        {
+            _modelPath = Path.Combine(dir, modelFileName);
+            _isAvailable = File.Exists(_piperExecutable) && File.Exists(_modelPath);
+            
+            if (!_isAvailable)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Error.WriteLine($"[Piper TTS] Modelo não encontrado para novo idioma: {_modelPath}");
+                Console.ResetColor();
+            }
         }
     }
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Jarvis.Core;
+using Jarvis.Infrastructure;
 
 namespace Jarvis.UI.ViewModels;
 
@@ -26,6 +27,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isVoiceLoopActive;
     [ObservableProperty] private string _coreStatus = "IDLE";
     [ObservableProperty] private string _voiceButtonLabel = "START VOICE LOOP";
+
+    // ── Language Toggle ───────────────────────────────────────────────────────
+    [ObservableProperty] private bool _isPortuguese = true;
+    [ObservableProperty] private string _languageLabel = "PT-BR";
 
     // ── Animation Properties (driven by background loop) ──────────────────────
     [ObservableProperty] private double _circleScale = 1.0;
@@ -129,6 +134,23 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsMainTabVisible     = false;
         IsTerminalTabVisible = true;
+    }
+
+    // =========================================================================
+    // LANGUAGE TOGGLE
+    // =========================================================================
+    [RelayCommand]
+    private void ToggleLanguage()
+    {
+        IsPortuguese = !IsPortuguese;
+        LanguageLabel = IsPortuguese ? "PT-BR" : "EN-GB";
+        
+        if (_ttsService is PiperTtsService piperService)
+        {
+            piperService.SetLanguage(IsPortuguese ? "pt_BR-faber-medium.onnx" : "en_GB-alan-medium.onnx");
+        }
+        
+        Log($"[SYSTEM] Language changed to {LanguageLabel}");
     }
 
     // =========================================================================

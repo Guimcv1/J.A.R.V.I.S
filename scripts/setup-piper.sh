@@ -31,18 +31,19 @@ MODELS_DIR="$PIPER_DIR/models"
 PIPER_VERSION="2023.11.14-2"
 PIPER_URL="https://github.com/rhasspy/piper/releases/download/${PIPER_VERSION}/piper_linux_x86_64.tar.gz"
 
-# Voz: en_GB-alan-medium — masculino britânico, grave e calmo
-# Outras opções (comente/descomente):
-#   en_GB-northern_english_male-medium
-#   en_US-ryan-high
-VOICE_NAME="en_GB-alan-medium"
-VOICE_QUALITY="medium"  # low / medium / high
+# ── Configuração de Vozes ─────────────────────────────────────────────────────
 
 HUGGINGFACE_BASE="https://huggingface.co/rhasspy/piper-voices/resolve/main"
-# Subdiretório usa o nome curto da voz (sem prefixo de língua)
-VOICE_SHORT_NAME="alan"   # corresponde a en_GB-alan-medium
-VOICE_URL="${HUGGINGFACE_BASE}/en/en_GB/${VOICE_SHORT_NAME}/${VOICE_QUALITY}/${VOICE_NAME}.onnx"
-CONFIG_URL="${HUGGINGFACE_BASE}/en/en_GB/${VOICE_SHORT_NAME}/${VOICE_QUALITY}/${VOICE_NAME}.onnx.json"
+
+# Voz 1: Inglês Britânico (en_GB-alan-medium)
+VOICE_EN="en_GB-alan-medium"
+URL_EN_ONNX="${HUGGINGFACE_BASE}/en/en_GB/alan/medium/${VOICE_EN}.onnx"
+URL_EN_JSON="${URL_EN_ONNX}.json"
+
+# Voz 2: Português Brasileiro (pt_BR-faber-medium)
+VOICE_PT="pt_BR-faber-medium"
+URL_PT_ONNX="${HUGGINGFACE_BASE}/pt/pt_BR/faber/medium/${VOICE_PT}.onnx"
+URL_PT_JSON="${URL_PT_ONNX}.json"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -97,19 +98,28 @@ else
     success "Piper instalado em $PIPER_DIR/piper"
 fi
 
-# ── 2. Baixar modelo de voz ───────────────────────────────────────────────────
+# ── 2. Baixar modelos de voz ───────────────────────────────────────────────────
 
-ONNX_FILE="$MODELS_DIR/${VOICE_NAME}.onnx"
-JSON_FILE="$MODELS_DIR/${VOICE_NAME}.onnx.json"
+baixar_modelo() {
+    local name="$1" url_onnx="$2" url_json="$3"
+    local onnx_file="$MODELS_DIR/${name}.onnx"
+    local json_file="$MODELS_DIR/${name}.onnx.json"
 
-if [[ -f "$ONNX_FILE" && -f "$JSON_FILE" ]]; then
-    success "Modelo de voz já encontrado: ${VOICE_NAME}"
-else
-    info "Baixando modelo de voz '${VOICE_NAME}' (~60MB)..."
-    download "$VOICE_URL"   "$ONNX_FILE"
-    download "$CONFIG_URL"  "$JSON_FILE"
-    success "Modelo instalado em $MODELS_DIR/"
-fi
+    if [[ -f "$onnx_file" && -f "$json_file" ]]; then
+        success "Modelo de voz já encontrado: ${name}"
+    else
+        info "Baixando modelo de voz '${name}'..."
+        download "$url_onnx" "$onnx_file"
+        download "$url_json" "$json_file"
+        success "Modelo instalado: ${name}"
+    fi
+}
+
+baixar_modelo "$VOICE_EN" "$URL_EN_ONNX" "$URL_EN_JSON"
+baixar_modelo "$VOICE_PT" "$URL_PT_ONNX" "$URL_PT_JSON"
+
+# Usa a voz PT como padrão para o teste
+ONNX_FILE="$MODELS_DIR/${VOICE_PT}.onnx"
 
 # ── 3. Teste de síntese ───────────────────────────────────────────────────────
 

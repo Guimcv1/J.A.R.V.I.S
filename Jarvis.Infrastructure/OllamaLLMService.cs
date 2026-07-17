@@ -54,6 +54,26 @@ public class OllamaLLMService : ILLMService
         }
     }
 
+    public async Task UnloadModelAsync()
+    {
+        try
+        {
+            // Sending an API request with keep_alive = 0 to unload the model from memory
+            var payload = new
+            {
+                model = _modelName,
+                keep_alive = 0
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/generate", payload);
+            response.EnsureSuccessStatusCode();
+        }
+        catch
+        {
+            // Ignore errors during unloading (e.g. if Ollama is not running anymore)
+        }
+    }
+
     /// <summary>
     /// Extracts &lt;think&gt;...&lt;/think&gt; blocks from the raw model output.
     /// Returns a structured <see cref="LLMResponse"/> with the thinking process
