@@ -35,15 +35,13 @@ PIPER_URL="https://github.com/rhasspy/piper/releases/download/${PIPER_VERSION}/p
 
 HUGGINGFACE_BASE="https://huggingface.co/rhasspy/piper-voices/resolve/main"
 
-# Voz 1: Inglês Britânico (en_GB-alan-medium)
-VOICE_EN="en_GB-alan-medium"
-URL_EN_ONNX="${HUGGINGFACE_BASE}/en/en_GB/alan/medium/${VOICE_EN}.onnx"
-URL_EN_JSON="${URL_EN_ONNX}.json"
-
-# Voz 2: Português Brasileiro (pt_BR-faber-medium)
-VOICE_PT="pt_BR-faber-medium"
-URL_PT_ONNX="${HUGGINGFACE_BASE}/pt/pt_BR/faber/medium/${VOICE_PT}.onnx"
-URL_PT_JSON="${URL_PT_ONNX}.json"
+# Vozes a baixar: (NomeArquivo|UrlONNX|UrlJSON)
+VOICES=(
+    "pt_BR-faber-medium|${HUGGINGFACE_BASE}/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx|${HUGGINGFACE_BASE}/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json"
+    "en_GB-alan-medium|${HUGGINGFACE_BASE}/en/en_GB/alan/medium/en_GB-alan-medium.onnx|${HUGGINGFACE_BASE}/en/en_GB/alan/medium/en_GB-alan-medium.onnx.json"
+    "en_US-ryan-high|${HUGGINGFACE_BASE}/en/en_US/ryan/high/en_US-ryan-high.onnx|${HUGGINGFACE_BASE}/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
+    "pt_BR-edresson-low|${HUGGINGFACE_BASE}/pt/pt_BR/edresson/low/pt_BR-edresson-low.onnx|${HUGGINGFACE_BASE}/pt/pt_BR/edresson/low/pt_BR-edresson-low.onnx.json"
+)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,9 +72,46 @@ download() {
 
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║         Jarvis — Setup do Piper TTS              ║${NC}"
+echo -e "${CYAN}║         Jarvis — Instalação e Setup              ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
+
+# ── 0. Verificar Dependências ─────────────────────────────────────────────────
+
+info "Verificando dependências..."
+
+# Verificar Ollama
+if command -v ollama &>/dev/null; then
+    success "Ollama está instalado."
+else
+    warn "Ollama não encontrado."
+    read -p "Deseja instalar o Ollama agora? [s/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Ss]$ ]]; then
+        info "Instalando Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+        success "Ollama instalado."
+    else
+        warn "Ollama não foi instalado. O assistente pode não funcionar corretamente."
+    fi
+fi
+
+# Verificar .NET
+if command -v dotnet &>/dev/null; then
+    success ".NET SDK está instalado."
+else
+    warn ".NET SDK não encontrado."
+    read -p "Deseja instalar o .NET SDK 10.0 agora? [s/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Ss]$ ]]; then
+        info "Instalando .NET SDK 10.0..."
+        curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0
+        success ".NET SDK instalado em ~/.dotnet"
+        warn "Lembre-se de adicionar ~/.dotnet ao seu PATH (ex: export PATH=\"\$PATH:\$HOME/.dotnet\" no seu ~/.bashrc)"
+    else
+        warn ".NET SDK não foi instalado. O aplicativo pode não compilar ou rodar."
+    fi
+fi
 
 mkdir -p "$PIPER_DIR" "$MODELS_DIR"
 
@@ -115,11 +150,13 @@ baixar_modelo() {
     fi
 }
 
-baixar_modelo "$VOICE_EN" "$URL_EN_ONNX" "$URL_EN_JSON"
-baixar_modelo "$VOICE_PT" "$URL_PT_ONNX" "$URL_PT_JSON"
+for item in "${VOICES[@]}"; do
+    IFS='|' read -r name onnx_url json_url <<< "$item"
+    baixar_modelo "$name" "$onnx_url" "$json_url"
+done
 
-# Usa a voz PT como padrão para o teste
-ONNX_FILE="$MODELS_DIR/${VOICE_PT}.onnx"
+# Usa a voz PT-BR principal como padrão para o teste
+ONNX_FILE="$MODELS_DIR/pt_BR-faber-medium.onnx"
 
 # ── 3. Teste de síntese ───────────────────────────────────────────────────────
 

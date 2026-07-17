@@ -79,18 +79,19 @@
 
                 <!-- Right Status & Language -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <!-- Language Toggle -->
-                    <Button Command="{Binding ToggleLanguageCommand}"
-                            Background="#131926"
-                            BorderBrush="#1A2033"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="12,4"
-                            VerticalAlignment="Center">
-                        <TextBlock Text="{Binding LanguageLabel}"
-                                   FontSize="11" FontWeight="Bold"
-                                   Foreground="#C5C6C7" LetterSpacing="1"/>
-                    </Button>
+                    <!-- Language Toggle ComboBox -->
+                    <ComboBox ItemsSource="{Binding AvailableVoices}"
+                              SelectedItem="{Binding SelectedVoice}"
+                              Background="#131926" Foreground="#C5C6C7"
+                              BorderBrush="#1A2033" CornerRadius="6"
+                              Width="180" VerticalAlignment="Center"
+                              VerticalContentAlignment="Center">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                     
                     <!-- Status pill -->
                     <Border Background="#131926"

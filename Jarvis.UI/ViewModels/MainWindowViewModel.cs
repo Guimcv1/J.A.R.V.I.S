@@ -28,9 +28,25 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _coreStatus = "IDLE";
     [ObservableProperty] private string _voiceButtonLabel = "START VOICE LOOP";
 
-    // ── Language Toggle ───────────────────────────────────────────────────────
-    [ObservableProperty] private bool _isPortuguese = true;
-    [ObservableProperty] private string _languageLabel = "PT-BR";
+    // ── Language & Voice ──────────────────────────────────────────────────────
+    public ObservableCollection<VoiceOption> AvailableVoices { get; } = new();
+
+    private VoiceOption? _selectedVoice;
+    public VoiceOption? SelectedVoice
+    {
+        get => _selectedVoice;
+        set
+        {
+            if (SetProperty(ref _selectedVoice, value) && value != null)
+            {
+                if (_ttsService is PiperTtsService piperService)
+                {
+                    piperService.SetLanguage(value.ModelFileName);
+                }
+                Log($"[SYSTEM] Voice changed to {value.Label}");
+            }
+        }
+    }
 
     // ── Animation Properties (driven by background loop) ──────────────────────
     [ObservableProperty] private double _circleScale = 1.0;
@@ -67,6 +83,14 @@ public partial class MainWindowViewModel : ViewModelBase
         Log("[SYSTEM] STT: Whisper.net ready");
         Log($"[SYSTEM] TTS: {(ttsService != null ? "Piper TTS ready" : "offline")}");
         PostToUI(() => ConversationLog.Add("JARVIS: Online. How can I assist you?"));
+
+        // Initialize Voice Options
+        AvailableVoices.Add(new VoiceOption("PT-BR (Masculino)", "pt_BR-faber-medium.onnx"));
+        AvailableVoices.Add(new VoiceOption("PT-BR (Alternativo)", "pt_BR-edresson-low.onnx"));
+        AvailableVoices.Add(new VoiceOption("EN-US (Americano)", "en_US-ryan-high.onnx"));
+        AvailableVoices.Add(new VoiceOption("EN-GB (Britânico)", "en_GB-alan-medium.onnx"));
+        
+        SelectedVoice = AvailableVoices[0]; // Set default
 
         // Start the visual animation loop immediately
         _ = Task.Run(() => RunAnimationLoopAsync(_cts.Token));
@@ -137,31 +161,17 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     // =========================================================================
-    // LANGUAGE TOGGLE
-    // =========================================================================
-    [RelayCommand]
-    private void ToggleLanguage()
-    {
-        IsPortuguese = !IsPortuguese;
-        LanguageLabel = IsPortuguese ? "PT-BR" : "EN-GB";
-        
-        if (_ttsService is PiperTtsService piperService)
-        {
-            piperService.SetLanguage(IsPortuguese ? "pt_BR-faber-medium.onnx" : "en_GB-alan-medium.onnx");
-        }
-        
-        Log($"[SYSTEM] Language changed to {LanguageLabel}");
-    }
-
-    // =========================================================================
     // SEND MESSAGE (text input)
     // =========================================================================
     [RelayCommand]
     private async Task SendMessageAsync()
     {
         if (string.IsNullOrWhiteSpace(UserInput)) return;
-        await ProcessInputAsync(UserInput);
-        UserInput = string.Empty;
+        
+        var input = UserInput;
+        UserInput = string.Empty; // Limpa a caixa de texto imediatamente
+        
+        await ProcessInputAsync(input);
     }
 
     // =========================================================================
@@ -299,5 +309,17 @@ public partial class MainWindowViewModel : ViewModelBase
             _uiContext.Post(_ => action(), null);
         else
             action();
+    }
+}
+
+public class VoiceOption
+{
+    public string Label { get; }
+    public string ModelFileName { get; }
+
+    public VoiceOption(string label, string modelFileName)
+    {
+        Label = label;
+        ModelFileName = modelFileName;
     }
 }
